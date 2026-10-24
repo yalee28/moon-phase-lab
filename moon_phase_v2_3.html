@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>달 하나, 한 달의 위상 탐구실 v2.2</title>
+<style>
+:root{color-scheme:light;--ink:#172b45;--muted:#53677d;--blue:#245bc3;--border:#d5e1ee;--bg:#f3f7fc;--panel:#fff;--focus:#ffb428}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.55}main{max-width:1250px;margin:auto;padding:22px}header{margin-bottom:18px}h1{font-size:clamp(1.5rem,3vw,2.1rem);margin:0 0 6px}h2{font-size:1.25rem;margin:0 0 12px}h3{font-size:1.05rem;margin:0 0 10px}p{margin:7px 0}.intro{color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:18px;align-items:start}.panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:19px;box-shadow:0 4px 18px #193c6b0a}.space-frame{background:#0b1830;border-radius:16px;overflow:hidden;margin:14px 0 12px}.space-frame svg{display:block;width:100%;height:auto}.space-frame text{font-family:system-ui,"Noto Sans KR",sans-serif}.muted{color:var(--muted);font-size:.91rem}.button-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.btn,.choice{font:inherit;min-height:52px;border:2px solid var(--border);border-radius:12px;background:#fff;color:var(--ink);font-weight:700;padding:9px 7px;cursor:pointer;touch-action:manipulation}.btn[aria-pressed="true"],.choice[aria-pressed="true"]{background:#e8f0ff;border-color:var(--blue);color:#143e94}.btn:focus-visible,.choice:focus-visible{outline:4px solid var(--focus);outline-offset:2px}.question{border:0;padding:0;margin:15px 0;min-width:0}.question legend{font-weight:800;margin-bottom:9px}.actions{display:flex;gap:10px;margin:18px 0 8px}.primary{background:var(--blue);border-color:var(--blue);color:#fff;flex:1}.secondary{flex:0 0 auto}.notice{min-height:26px;color:#944007;font-weight:700;margin-top:8px}.result{margin-top:17px;border-radius:15px;border:2px solid #b9cce6;background:#f0f6ff;padding:16px;min-height:150px}.result[hidden]{display:none}.result{scroll-margin-top:16px}.result h3{color:#1d4b91}.result-display{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.moon-view{width:132px;height:132px;flex:0 0 132px;filter:drop-shadow(0 2px 7px #172b4530)}.moon-view[hidden],.moon-unseen[hidden]{display:none}.moon-unseen{width:132px;min-height:132px;flex:0 0 132px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.6;font-weight:800;color:#294a73;background:#e1ebfa;border-radius:12px;padding:12px}.feedback{font-weight:750;margin:11px 0 0}.learning{margin-top:18px}.learning ul{padding-left:21px;margin:7px 0}.learning li{margin:6px 0}.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.87rem;color:var(--muted)}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:middle}.hint{font-size:.88rem;color:#53677d}.topline{font-weight:750;color:#244b8c}#currentPosition{font-weight:800}@media(max-width:800px){main{padding:13px}.layout{grid-template-columns:1fr}.panel{padding:15px}.space-frame{max-width:610px;margin-left:auto;margin-right:auto}}@media(max-width:390px){.button-grid{grid-template-columns:repeat(2,1fr)}.actions{flex-wrap:wrap}.secondary{flex:1}}@media(prefers-reduced-motion:no-preference){#orbitMoon{transition:transform .28s ease}}
+
+/* 공전 궤도 위 선택 위치: 모바일에서도 알아보기 쉬운 A–D 표식 */
+.orbit-location circle{fill:#e3f1ff;stroke:#547bae;stroke-width:2.3}
+.orbit-location text{fill:#173e72;font-size:21px;font-weight:900;text-anchor:middle;dominant-baseline:central}
+.orbit-location .orbit-tick{stroke:#a8bfdc;stroke-width:2;stroke-dasharray:3 3}
+.orbit-location.is-current circle{fill:#ffe7a7;stroke:#ffb32e;stroke-width:3.5}
+.orbit-location.is-current text{fill:#5f3b00}
+@media(max-width:600px){.button-grid .btn{font-size:.95rem}}
+
+/* v2.2: 태블릿 화면에서 공전 그림과 위치 버튼을 나란히 표시 */
+.orbit-workspace{display:grid;grid-template-columns:minmax(0,1fr) clamp(108px,11.2vw,150px);gap:12px;align-items:start}
+.orbit-workspace .space-frame{margin:9px 0 0;min-width:0}
+.orbit-control-panel{min-width:0;display:flex;flex-direction:column;gap:9px;padding-top:10px}
+.orbit-control-panel h3{font-size:1rem;line-height:1.3;margin:0}
+.orbit-control-panel .button-grid{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+.orbit-control-panel .btn{font-size:.93rem;min-height:51px;padding:7px 4px;white-space:nowrap}
+.orbit-control-panel .orbit-short-hint{margin:0;font-size:.77rem;line-height:1.52;color:var(--muted)}
+.orbit-model-note{margin:8px 0}
+@media(max-width:649px){
+ .orbit-workspace{display:flex;flex-direction:column;gap:9px}
+ .orbit-workspace .space-frame{width:100%;margin:7px 0 0}
+ .orbit-control-panel{width:100%;padding-top:0;gap:7px}
+ .orbit-control-panel .button-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+ .orbit-control-panel .btn{min-height:46px;font-size:.88rem}
+ .orbit-control-panel .orbit-short-hint{font-size:.83rem}
+}
+@media(max-width:390px){.orbit-control-panel .button-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:650px) and (max-height:670px){
+ main{padding-top:10px;padding-bottom:10px}
+ header{margin-bottom:8px}
+ header h1{font-size:1.55rem;margin-bottom:2px}
+ header .intro{font-size:.89rem;margin:0}
+ .panel{padding:13px}
+ .panel h2{font-size:1.05rem;margin-bottom:5px}
+ .panel>p{margin:4px 0}
+ .orbit-workspace{gap:9px;grid-template-columns:minmax(0,1fr) 112px}
+ .orbit-control-panel{gap:6px;padding-top:5px}
+ .orbit-control-panel .btn{min-height:43px;font-size:.87rem}
+ .orbit-control-panel .orbit-short-hint{font-size:.72rem}
+ .orbit-workspace .space-frame{margin:5px 0 0}
+ .orbit-model-note{font-size:.77rem;line-height:1.4}
+}
+</style>
+</head>
+<body>
+<main>
+<header><h1>🌙 달 하나, 한 달의 위상 탐구실</h1><p class="intro">달의 공전 위치를 선택하고, 위상 이름과 대표적인 남중 시각을 예측한 다음 정답을 확인해 보세요.</p></header>
+<div class="layout">
+<section class="panel" aria-labelledby="spaceTitle">
+<h2 id="spaceTitle">① 우주에서 본 태양·지구·달</h2>
+<p>현재 공전 위치: <span id="currentPosition">위치 A</span></p>
+<div class="orbit-workspace">
+<div class="space-frame">
+<svg viewBox="0 0 560 420" role="img" aria-labelledby="spaceSvgTitle spaceSvgDesc">
+<title id="spaceSvgTitle">지구 주위를 공전하는 하나의 달</title><desc id="spaceSvgDesc">지구를 중심으로 한 원형 궤도에서 달 하나가 선택한 위치에 표시됩니다. 태양은 오른쪽에 고정되어 있습니다.</desc>
+<defs><radialGradient id="earthFill" cx="35%" cy="30%"><stop stop-color="#83d4ff"/><stop offset="1" stop-color="#2472c8"/></radialGradient><radialGradient id="sunFill"><stop stop-color="#fff2a2"/><stop offset="1" stop-color="#ffb33c"/></radialGradient><clipPath id="moonClip"><circle cx="0" cy="0" r="17"/></clipPath></defs>
+<circle cx="227" cy="210" r="151" fill="none" stroke="#6585b5" stroke-width="2.5" stroke-dasharray="8 8"/>
+<path id="orbitDirectionArc" d="M 180.34 66.39 A 151 151 0 0 0 96.23 134.5" fill="none" stroke="#8be4ff" stroke-width="4" stroke-linecap="round"/>
+<path id="orbitDirectionHead" d="M 99 119 L 96.23 134.5 L 111.07 130.35" fill="none" stroke="#8be4ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<!-- 달의 이름은 숨기고, 궤도상의 위치 문자 A~D는 항상 보이게 한다. -->
+<g id="orbitPositionMarkers" aria-label="달의 공전 위치 A, B, C, D">
+ <g class="orbit-location is-current" data-orbit-location="new" aria-label="위치 A: 태양 쪽, 오른쪽"><path class="orbit-tick" d="M 395 210 L 405 210"/><circle cx="422" cy="210" r="17"/><text x="422" y="211">A</text></g>
+ <g class="orbit-location" data-orbit-location="first" aria-label="위치 B: 위쪽"><path class="orbit-tick" d="M 245 59 L 255 59"/><circle cx="272" cy="59" r="17"/><text x="272" y="60">B</text></g>
+ <g class="orbit-location" data-orbit-location="full" aria-label="위치 C: 태양 반대쪽, 왼쪽"><path class="orbit-tick" d="M 94 210 L 104 210"/><circle cx="121" cy="210" r="17"/><text x="121" y="211">C</text></g>
+ <g class="orbit-location" data-orbit-location="last" aria-label="위치 D: 아래쪽"><path class="orbit-tick" d="M 245 361 L 255 361"/><circle cx="272" cy="361" r="17"/><text x="272" y="362">D</text></g>
+</g>
+<text x="27" y="39" fill="#d9edff" font-size="16" font-weight="700">↺ 공전 방향: 시계 반대 방향</text>
+<text x="27" y="62" fill="#b9cce7" font-size="12">지구 북극 쪽에서 내려다본 모습</text>
+<circle cx="227" cy="210" r="37" fill="url(#earthFill)" stroke="#b8f1ff" stroke-width="2"/>
+<path d="M212 182 L226 193 L220 202 L235 215 L224 230 L209 220 L204 204Z M237 184 L246 192 L241 200 L253 213 L246 224 L235 220 L238 205Z" fill="#46b87b" opacity=".9"/>
+<text x="227" y="268" text-anchor="middle" fill="white" font-size="17" font-weight="800">지구</text>
+<g id="orbitMoon" transform="translate(378 210)"><circle r="18" fill="#2c3441" stroke="#dbe8f7" stroke-width="1.5"/><path d="M0 -17 A17 17 0 0 1 0 17 Z" fill="#f7f4da"/><circle cx="-6" cy="-7" r="3" fill="#647083" opacity=".6"/><circle cx="-8" cy="6" r="4" fill="#647083" opacity=".5"/></g>
+<text id="moonLabel" x="378" y="251" text-anchor="middle" fill="white" font-size="17" font-weight="800">달</text>
+<g><circle cx="502" cy="210" r="39" fill="url(#sunFill)" stroke="#ffde78" stroke-width="3"/><g stroke="#ffcc56" stroke-width="4" stroke-linecap="round"><path d="M502 156 V164 M502 256 V264 M448 210 H456 M548 210 H556 M464 172 L470 178 M534 242 L540 248 M540 172 L534 178 M470 242 L464 248"/></g><text x="502" y="270" text-anchor="middle" fill="white" font-size="17" font-weight="800">태양</text></g>
+</svg>
+</div>
+<div class="orbit-control-panel">
+<h3>달의 위치 선택</h3>
+<div id="positionChoices" class="button-grid" role="group" aria-label="달의 공전 위치 선택">
+<button type="button" class="btn" data-position="new" aria-pressed="true">위치 A</button><button type="button" class="btn" data-position="first" aria-pressed="false">위치 B</button><button type="button" class="btn" data-position="full" aria-pressed="false">위치 C</button><button type="button" class="btn" data-position="last" aria-pressed="false">위치 D</button>
+</div>
+<p class="orbit-short-hint">그림의 A·B·C·D와 같은 버튼을 누르세요.<br><strong>노란 표식</strong>은 현재 달 위치입니다.</p>
+</div>
+</div>
+<p class="hint orbit-model-note">그림은 위치 관계를 이해하기 위한 모형이며, 실제 천체의 크기와 거리 비율을 나타내지 않습니다.</p>
+<p class="muted">위치 A → B → C → D → A 순서로 하나의 달이 시계 반대 방향으로 공전합니다. 위치를 바꾸면 예측을 다시 시작합니다.</p>
+</section>
+<section class="panel" aria-labelledby="predictionTitle">
+<h2 id="predictionTitle">② 예측하고 결과 확인하기</h2>
+<p class="topline">선택한 위치의 달은 지구에서 어떻게 보일까요?</p>
+<fieldset class="question"><legend>1. 달의 위상 이름 예측</legend><div id="phaseChoices" class="choice-grid" role="group" aria-label="위상 이름 예측"><button type="button" class="choice" data-phase="삭" aria-pressed="false">삭</button><button type="button" class="choice" data-phase="상현" aria-pressed="false">상현</button><button type="button" class="choice" data-phase="망" aria-pressed="false">망</button><button type="button" class="choice" data-phase="하현" aria-pressed="false">하현</button></div></fieldset>
+<fieldset class="question"><legend>2. 대표적인 남중 시각 예측</legend><div id="timeChoices" class="choice-grid" role="group" aria-label="남중 시각 예측"><button type="button" class="choice" data-time="낮 12시" aria-pressed="false">낮 12시</button><button type="button" class="choice" data-time="오후 6시" aria-pressed="false">오후 6시</button><button type="button" class="choice" data-time="밤 12시" aria-pressed="false">밤 12시</button><button type="button" class="choice" data-time="오전 6시" aria-pressed="false">오전 6시</button></div></fieldset>
+<div class="actions"><button type="button" class="btn primary" id="checkBtn">결과 확인</button><button type="button" class="btn secondary" id="resetBtn">처음부터</button></div>
+<p id="notice" class="notice" role="status" aria-live="polite"></p>
+<section id="result" class="result" tabindex="-1" aria-labelledby="resultTitle" hidden><h3 id="resultTitle">지구에서 관찰되는 달의 위상</h3><div class="result-display"><svg id="observedMoonGraphic" class="moon-view" viewBox="0 0 140 140" role="img" aria-labelledby="observedTitle observedDesc"><title id="observedTitle">지구에서 본 달의 위상</title><desc id="observedDesc">선택된 위치에 따른 달의 밝은 부분</desc><defs><clipPath id="observedClip"><circle cx="70" cy="70" r="55"/></clipPath></defs><circle cx="70" cy="70" r="55" fill="#303a50" stroke="#8293ad" stroke-width="2"/><g id="observedLight" clip-path="url(#observedClip)"></g></svg><div id="newMoonObservation" class="moon-unseen" role="img" aria-label="삭: 달이 관찰되지 않음" hidden>달이<br>관찰되지 않음</div><div><p>위상 이름: <strong id="answerPhase"></strong></p><p>대표 남중 시각: <strong id="answerTime"></strong></p></div></div><p id="feedback" class="feedback" aria-live="polite"></p><p id="specialNote"></p><p class="hint">남중 시각은 중학교 학습을 위한 이상적인 모형의 대표값입니다. 실제 관측 시각과 차이가 날 수 있습니다.</p></section>
+</section>
+</div>
+<section class="panel learning" aria-labelledby="learnTitle"><h2 id="learnTitle">③ 탐구에 도움이 되는 과학 개념</h2><ul><li><strong>달의 위상</strong>은 지구에서 관찰되는 달의 밝은 부분의 모양입니다.</li><li>달은 스스로 빛을 내지 않고 <strong>태양빛을 반사</strong>합니다.</li><li>달은 지구 주위를 공전합니다. 여러 개의 달이 생기는 것이 아니라 <strong>하나의 달</strong>이 시간에 따라 서로 다른 위상으로 관찰됩니다.</li><li>달의 위치는 <strong>북극 쪽에서 내려다본 모습</strong>입니다. 공전 방향 화살표는 정답 확인 전후에도 항상 표시됩니다.</li><li>왼쪽의 <strong>우주에서 내려다본 모습</strong>과 오른쪽의 <strong>지구에서 관찰한 위상</strong>은 서로 다른 관점을 표현합니다.</li></ul></section>
+</main>
+<script>
+(()=>{'use strict';
+const positions={new:{label:'위치 A',name:'삭',angle:0,x:378,y:210,time:'낮 12시'},first:{label:'위치 B',name:'상현',angle:90,x:227,y:59,time:'오후 6시'},full:{label:'위치 C',name:'망',angle:180,x:76,y:210,time:'밤 12시'},last:{label:'위치 D',name:'하현',angle:270,x:227,y:361,time:'오전 6시'}};
+let selectedPosition='new', predictedPhase=null, predictedTime=null;
+const byId=id=>document.getElementById(id);
+const positionButtons=[...document.querySelectorAll('[data-position]')],phaseButtons=[...document.querySelectorAll('[data-phase]')],timeButtons=[...document.querySelectorAll('[data-time]')];
+function syncButtons(buttons,attribute,value){for(const btn of buttons)btn.setAttribute('aria-pressed',String(btn.dataset[attribute]===value));}
+function clearPredictions(){predictedPhase=null;predictedTime=null;syncButtons(phaseButtons,'phase',null);syncButtons(timeButtons,'time',null);byId('notice').textContent='';byId('result').hidden=true;byId('newMoonObservation').hidden=true;byId('observedMoonGraphic').removeAttribute('hidden');}
+function choosePosition(key){selectedPosition=key;const p=positions[key];byId('currentPosition').textContent=p.label;document.querySelectorAll('[data-orbit-location]').forEach(marker=>marker.classList.toggle('is-current',marker.dataset.orbitLocation===key));byId('orbitMoon').setAttribute('transform',`translate(${p.x} ${p.y})`);byId('moonLabel').setAttribute('x',p.x);byId('moonLabel').setAttribute('y',p.y>310?p.y-27:p.y+41);syncButtons(positionButtons,'position',key);clearPredictions();}
+for(const btn of positionButtons)btn.addEventListener('click',()=>choosePosition(btn.dataset.position));
+for(const btn of phaseButtons)btn.addEventListener('click',()=>{predictedPhase=btn.dataset.phase;syncButtons(phaseButtons,'phase',predictedPhase);});
+for(const btn of timeButtons)btn.addEventListener('click',()=>{predictedTime=btn.dataset.time;syncButtons(timeButtons,'time',predictedTime);});
+function drawObservedMoon(key){const group=byId('observedLight');group.replaceChildren();const NS='http://www.w3.org/2000/svg';if(key==='new')return;const bright=document.createElementNS(NS,'path');let d;if(key==='full')d='M70 15 A55 55 0 1 1 69.99 15 Z';else if(key==='first')d='M70 15 A55 55 0 0 1 70 125 Z';else d='M70 15 A55 55 0 0 0 70 125 Z';bright.setAttribute('d',d);bright.setAttribute('fill','#fff5cb');group.append(bright);}
+byId('checkBtn').addEventListener('click',()=>{if(!predictedPhase||!predictedTime){let message;if(!predictedPhase&&!predictedTime)message='위상 이름과 남중 시각을 모두 선택해 주세요.';else if(!predictedPhase)message='달의 위상 이름을 선택해 주세요.';else message='대표적인 남중 시각을 선택해 주세요.';byId('notice').textContent=message;return;}
+const correct=positions[selectedPosition],phaseOK=predictedPhase===correct.name,timeOK=predictedTime===correct.time;drawObservedMoon(selectedPosition);byId('observedMoonGraphic').toggleAttribute('hidden',selectedPosition==='new');byId('newMoonObservation').hidden=selectedPosition!=='new';byId('observedDesc').textContent=correct.name==='삭'?'밝은 부분이 보이지 않는 삭':correct.name==='망'?'전체가 밝은 보름달':correct.name==='상현'?'오른쪽 반원이 밝은 상현달':'왼쪽 반원이 밝은 하현달';byId('answerPhase').textContent=correct.name;byId('answerTime').textContent=correct.time;
+let response;if(phaseOK&&timeOK)response='정답입니다! 위상 이름과 남중 시각, 두 가지 모두 맞혔어요.';else if(phaseOK)response='위상 이름은 정답이에요! 남중 시각은 틀렸어요. 정답은 '+correct.time+'입니다.';else if(timeOK)response='남중 시각은 정답이에요! 위상 이름은 틀렸어요. 정답은 '+correct.name+'입니다.';else response='두 예측 모두 틀렸어요. 정답은 '+correct.name+', '+correct.time+'입니다. 왼쪽에서 달의 공전 위치를 다시 살펴보세요.';
+byId('feedback').textContent=response;byId('specialNote').textContent=selectedPosition==='new'?'삭일 때도 달은 존재하지만 태양과 거의 같은 방향에 있으므로 지구에서 밝은 면을 보기 어렵고, 태양빛에 묻혀 일반적으로 관찰되지 않습니다. 자정 무렵에는 달이 지평선 아래에 있으므로 밤하늘에 검은 달이 떠 있는 것은 아닙니다.':'';byId('notice').textContent='';byId('result').hidden=false;
+// 갤럭시 태블릿에서도 결과 확인 후 정답 영역을 직접 스크롤하지 않아도 볼 수 있게 합니다.
+// 결과가 DOM에 배치된 다음 이동하고, 모션 감소 접근성 설정을 따릅니다.
+const resultPanel=byId('result');
+resultPanel.focus({preventScroll:true});
+resultPanel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+});
+byId('resetBtn').addEventListener('click',()=>{
+choosePosition('new');
+window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+});choosePosition('new');
+})();
+</script>
+</body>
+</html>
